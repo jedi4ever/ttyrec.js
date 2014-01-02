@@ -1,0 +1,52 @@
+{
+  "name": "ttyrec",
+  "version": "0.0.1",
+  "private": false,
+  "author": "Patrick Debois <patrick.debois@jedi.be>",
+  "description": "Level up your skills against skillerd",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "main": "./lib/ttyrec.js",
+  "bin": {
+    "tty-rec": "./bin/tty-rec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jedi4ever/ttyrec.git"
+  },
+  "keywords": [
+    "terminal",
+    "ttyrec",
+    "nethask"
+  ],
+  "dependencies": {
+    "pty.js": "~0.2.3",
+    "async": "~0.2.9"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "jshint": "*",
+    "jscoverage": "*",
+    "nodewatch": "*",
+    "assert": "*",
+    "expect.js": "*",
+    "should": "0.5.1",
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-contrib-watch": "~0.4.4",
+    "grunt-release": "~0.3.5",
+    "grunt-mocha-test": "~0.5.0",
+    "blanket": "~1.1.5",
+    "grunt-html": "~0.3.3",
+    "grunt-readme-generator": "~0.3.41",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-jsdoc": "~0.4.0",
+    "grunt-gh-pages": "~0.7.1",
+    "browserify": "~3.18.0"
+  },
+  "license": "MIT",
+  "engine": {
+    "node": ">=0.8"
+  }
+}

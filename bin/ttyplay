@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+// -*- mode: javascript -*-
+// vi: set ft=javascript :
+'use strict';
+
+var fs = require('fs');
+var fileStream = fs.createReadStream('ttyrecord');
+
+var ttyrec = require('../lib/ttyrec.js');
+
+var ttyplayStream = new ttyrec.PlayStream();
+
+fileStream.pipe(ttyplayStream);
+ttyplayStream.pipe(process.stdout);

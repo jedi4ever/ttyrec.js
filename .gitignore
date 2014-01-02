@@ -1,0 +1,9 @@
+node_modules/*
+.DS_Store
+*.run
+tmp/*
+.*.swp
+coverage.html
+config.js
+.grunt
+ttyrecord
