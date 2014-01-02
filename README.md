@@ -2,6 +2,8 @@
 
 a native implementation for encoding and decoding ttyrec files.
 
+[![Build Status](https://travis-ci.org/jedi4ever/ttyrec.js.png)](https://travis-ci.org/jedi4ever/ttyrec.js)
+
 # Usage
 This implements a duplex / `transform` stream v2 . 
 
