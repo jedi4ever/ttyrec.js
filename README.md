@@ -7,19 +7,34 @@ a native implementation for encoding and decoding ttyrec files.
 # Usage
 This implements a duplex / `transform` stream v2 . 
 
+It also provides two simple executable `ttyrec` and `ttyplay` commands.
+
 ## Write recStream
 ```
+  var fs = require('ps');
+  var pty = require('pty');
+
   var ttyrec = require('ttyrec');
   var ttyrecStream = new ttyrec.recStream();
-  process.stdout.pipe(ttyrecStream);
-  process.stdout.pipe(ttyrecStream);
+
+  var fileStream = fs.createWriteStream('ttyrecord');
+
+  var _pty = pty.spawn('/bin/bash');
+
+  pty.pipe(ttyrecStream);
+  ttyrecStream.pipe(fileStream);
 ```
 
 ## Read playStream
 ```
+  var fs = require('ps');
+
   var ttyrec = require('ttyrec');
+  var fileStream = fs.createReadStream('ttyrecord');
+
   var ttyplayStream = new ttyrec.playStream();
-  ttyrecStream.pipe(process.stdout);
+  fileStream.pipe(ttyplayStream);
+  ttyplayStream.pipe(process.stdout);
 ```
 
 ## Encode
@@ -56,6 +71,7 @@ This implements a duplex / `transform` stream v2 .
 - only handles buffered (non encoded streams)
 
 # Todo
+- enhance the executables to mimic arguments from real ttyrec and ttyplay
 - handle correct timing
 - enable correct delay for first packet
 - avoid too much recursion
