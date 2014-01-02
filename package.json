@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": false,
   "author": "Patrick Debois <patrick.debois@jedi.be>",
-  "description": "Level up your skills against skillerd",
+  "description": "Native javascript Ttyrec file encoder/decoder using streams",
   "scripts": {
     "test": "grunt test"
   },
