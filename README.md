@@ -11,7 +11,7 @@ It also provides two simple executable `ttyrec` and `ttyplay` commands.
 
 ## Write recStream
 ```
-  var fs = require('ps');
+  var fs = require('fs');
   var pty = require('pty');
 
   var ttyrec = require('ttyrec');
@@ -27,7 +27,7 @@ It also provides two simple executable `ttyrec` and `ttyplay` commands.
 
 ## Read playStream
 ```
-  var fs = require('ps');
+  var fs = require('fs');
 
   var ttyrec = require('ttyrec');
   var fileStream = fs.createReadStream('ttyrecord');
