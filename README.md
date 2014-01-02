@@ -20,6 +20,7 @@ It also provides two simple executable `ttyrec` and `ttyplay` commands.
   var fileStream = fs.createWriteStream('ttyrecord');
 
   var _pty = pty.spawn('/bin/bash');
+  process.stdin.pipe(_pty);
 
   _pty.pipe(ttyrecStream);
   ttyrecStream.pipe(fileStream);
