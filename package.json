@@ -9,7 +9,7 @@
   },
   "main": "./lib/ttyrec.js",
   "bin": {
-    "ttyrec": "./bin/ttyrec"
+    "ttyrec": "./bin/ttyrec",
     "ttyplay": "./bin/ttyplay"
   },
   "repository": {
