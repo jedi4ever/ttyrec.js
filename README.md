@@ -5,7 +5,7 @@ a native implementation for encoding and decoding ttyrec files.
 [![Build Status](https://travis-ci.org/jedi4ever/ttyrec.js.png)](https://travis-ci.org/jedi4ever/ttyrec.js)
 
 # Usage
-This implements a duplex / `transform` stream v2 . 
+This implements a duplex / `transform` stream v2 .  Therefore only node v0.10.x is supported.
 
 It also provides two simple executable `ttyrec` and `ttyplay` commands.
 
@@ -69,9 +69,11 @@ It also provides two simple executable `ttyrec` and `ttyplay` commands.
 # Limitations
 - only decodes relative timestamps,need to handle non-relative timestamps
 - only handles buffered (non encoded streams)
+- only works on v0.10.x
 
 # Todo
 - enhance the executables to mimic arguments from real ttyrec and ttyplay
+- make v0.11 and v0.8 compatible
 - handle correct timing
 - enable correct delay for first packet
 - avoid too much recursion
