@@ -1,6 +1,6 @@
 {
   "name": "ttyrec",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "private": false,
   "author": "Patrick Debois <patrick.debois@jedi.be>",
   "description": "Native javascript Ttyrec file encoder/decoder using streams",
