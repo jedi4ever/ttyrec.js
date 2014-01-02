@@ -9,7 +9,8 @@
   },
   "main": "./lib/ttyrec.js",
   "bin": {
-    "tty-rec": "./bin/tty-rec"
+    "ttyrec": "./bin/ttyrec"
+    "ttyplay": "./bin/ttyplay"
   },
   "repository": {
     "type": "git",
@@ -18,6 +19,10 @@
   "keywords": [
     "terminal",
     "ttyrec",
+    "ttyplay",
+    "vt100",
+    "term",
+    "tty",
     "nethask"
   ],
   "dependencies": {
