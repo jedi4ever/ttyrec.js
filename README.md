@@ -21,7 +21,7 @@ It also provides two simple executable `ttyrec` and `ttyplay` commands.
 
   var _pty = pty.spawn('/bin/bash');
 
-  pty.pipe(ttyrecStream);
+  _pty.pipe(ttyrecStream);
   ttyrecStream.pipe(fileStream);
 ```
 
