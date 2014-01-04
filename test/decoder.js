@@ -61,4 +61,22 @@ describe('ttyrec decode', function () {
     done();
   });
 
+  it.skip('should not blow up with too much recursion', function(done) {
+    var decoder = ttyrec.decoder;
+    var encoder = ttyrec.encoder;
+    var chunks = [];
+
+    var nr = 10000;
+    for (var i=0;i<nr;i++) {
+      var record = encoder.encode(i, 20, new Buffer('a'));
+      chunks.push(record);
+    }
+
+    var bigChunk = Buffer.concat(chunks);
+    var records = decoder.decode(bigChunk)[0];
+
+    expect(records.length).to.be(nr);
+    done();
+  });
+
 });
