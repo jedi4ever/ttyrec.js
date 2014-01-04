@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jedi4ever/ttyrec.git"
+    "url": "https://github.com/jedi4ever/ttyrec.js.git"
   },
   "keywords": [
     "terminal",
@@ -23,7 +23,7 @@
     "vt100",
     "term",
     "tty",
-    "nethask"
+    "nethack"
   ],
   "dependencies": {
     "pty.js": "~0.2.3",
