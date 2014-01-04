@@ -1,9 +1,3 @@
-var path = require('path');
-var fs = require('fs');
-var expect = require('expect.js');
-
-var ttyrec = require('../lib/ttyrec');
-
 describe('ttyrec decode', function () {
 
   it('should find one record in a chunk with one record', function(done) {

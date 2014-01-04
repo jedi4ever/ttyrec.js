@@ -1,9 +1,3 @@
-var path = require('path');
-var fs = require('fs');
-var expect = require('expect.js');
-var path = require('path');
-
-var ttyrec = require('../lib/ttyrec.js');
 var encoder = ttyrec.encoder;
 
 describe('ttyrec Play Stream', function () {

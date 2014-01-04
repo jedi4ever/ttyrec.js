@@ -1,10 +1,3 @@
-var path = require('path');
-var fs = require('fs');
-var expect = require('expect.js');
-var path = require('path');
-
-var ttyrec = require('../lib/ttyrec.js');
-
 describe('ttyrec encoder', function () {
 
   it('should have length of 13 for 1 char', function(done) {
