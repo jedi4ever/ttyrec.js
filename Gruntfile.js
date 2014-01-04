@@ -155,11 +155,21 @@ module.exports = function(grunt) {
       }
     },
     'gh-pages': {
-        options: {
-          base: 'docs',
-          repo: 'git@github.com:jedi4ever/bluebox.js.git'
+      options: {
+        base: 'docs',
+        repo: 'git@github.com:jedi4ever/ttyrec.js.git'
+      },
+      src: [ '**' ] // All files in the docs
+    },
+    browserify: {
+      dist: {
+        files: {
+          'dist/ttyrec.js': ['lib/ttyrec.js'],
         },
-        src: [ '**' ] // All files in the docs
+        options: {
+          'standalone': 'ttyrec'
+        }
+      }
     }
   });
 
@@ -177,6 +187,7 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-jsdoc');
   grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-browserify');
 
   grunt.registerTask('test', ['jshint','mochaTest']);
 
