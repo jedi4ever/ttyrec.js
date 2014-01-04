@@ -15,6 +15,20 @@ describe('ttyrec decode', function () {
     done();
   });
 
+  it('should find no record in a chunk with an incomplete record', function(done) {
+    var decoder = ttyrec.decoder;
+    var encoder = ttyrec.encoder;
+
+    var onerecord = encoder.encode(10, 20, new Buffer('abc'));
+    var incompleteRecord = onerecord.slice(0, -2);
+
+    // 0 records found
+    expect(decoder.decode(incompleteRecord)[0].length).to.be(0);
+    // Rest equals the incompleteRecord
+    expect(decoder.decode(incompleteRecord)[1]).to.eql(incompleteRecord);
+    done();
+  });
+
   it('should find two records in a chunk with two record', function(done) {
     var decoder = ttyrec.decoder;
     var encoder = ttyrec.encoder;
