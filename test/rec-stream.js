@@ -80,10 +80,9 @@ describe('ttyrec Rec Stream', function () {
       var results = decoder.decode(record);
       var records = results[0];
       var r = records[0];
-      expect(r).to.eql(text);
+      expect(r.packet).to.be(text);
       done();
     });
-
 
     recStream.write(text);
   });
