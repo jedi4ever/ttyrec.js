@@ -4,7 +4,18 @@
 'use strict';
 
 var fs = require('fs');
+
+var minimist = require('minimist');
+var argv = require('minimist')(process.argv.slice(2));
+
+var shell = argv.e || process.env['SHELL'];
+var filename = argv._[0] || 'ttyrecord';
+
 var fileStream = fs.createWriteStream('ttyrecord');
+fileStream.on('error', function(err) {
+  console.err('Error', err.toString());
+  process.exit(-1);
+});
 
 var ttyrec = require('../lib/ttyrec.js');
 var ttyrecStream = new ttyrec.RecStream();
@@ -13,7 +24,7 @@ var settings = {
    cols: process.stdout.columns,
    rows: process.stdout.rows,
    cwd: process.cwd(),
-   command: process.env['SHELL']
+   command: shell
 //   commandArgs: [ '-l' ]
 };
 
@@ -21,6 +32,7 @@ var ps1 = '(\\[\\033[5;31m\\]*\\[\\033[0m\\])';
 var penv = JSON.parse(JSON.stringify(process.env));
 var nps1 = [ ps1 , process.env['PS1'] ].join('');
 penv['PS1'] = nps1;
+penv['SHELL'] = shell;
 
 
 var pty = require('pty.js');
@@ -31,8 +43,8 @@ var _pty = pty.spawn(settings.command , settings.commandArgs, {
   rows: settings.rows
 });
 
-_pty.on('exit', function(data) {
-  process.exit;
+_pty.on('end', function(data) {
+  process.exit();
 });
 
 // If we are piped to , set raw mode

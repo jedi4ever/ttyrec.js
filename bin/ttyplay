@@ -3,12 +3,67 @@
 // vi: set ft=javascript :
 'use strict';
 
+
+var minimist = require('minimist');
+var argv = require('minimist')(process.argv.slice(2), { boolean: [ 'n' ]});
+
+var filename = argv._[0] || null;
+var speed = 1;
+
+if (argv.s !== undefined ) {
+  speed = argv.s;
+};
+
+if (argv.n === true ) {
+  speed = 0;
+};
+
 var fs = require('fs');
-var fileStream = fs.createReadStream('ttyrecord');
+var fileStream;
 
 var ttyrec = require('../lib/ttyrec.js');
 
 var ttyplayStream = new ttyrec.PlayStream();
+ttyplayStream.setSpeed(speed);
+
+if (typeof process.stdin.setRawMode === 'function') {
+  process.stdin.setRawMode(true);
+}
+
+if (filename === null) {
+  // If we are piped to , set raw mode
+
+
+  fileStream = process.stdin;
+} else {
+  fileStream = fs.createReadStream(filename);
+}
 
 fileStream.pipe(ttyplayStream);
 ttyplayStream.pipe(process.stdout);
+ttyplayStream.on('end', function() {
+  process.exit(0);
+});
+
+process.stdin.on('data', function (chunk) {
+  var code = chunk.toString().charCodeAt(0);
+
+  if (code === 3) { // CTRL-C
+    process.exit(0);
+  }
+
+  if ((code === 43) || (code === 102)) { // '+' or 'f' (fast)
+    speed = speed * 2;
+    ttyplayStream.setSpeed(speed);
+  };
+
+  if ((code === 45) || (code === 115)) { // '-' or 's' (slow)
+    speed = speed / 2;
+    ttyplayStream.setSpeed(speed);
+  };
+
+  if (code === 49) { // '1'
+    speed = 1;
+    ttyplayStream.setSpeed(speed);
+  };
+});

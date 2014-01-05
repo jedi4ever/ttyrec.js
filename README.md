@@ -78,8 +78,10 @@ See [Ttyrec format specification](http://en.wikipedia.org/wiki/Ttyrec#Technical_
 - only works on v0.10.x
 
 # Todo
-- enhance the executables to mimic arguments from real ttyrec and ttyplay
+- enhance the executables to mimic arguments from real ttyrec and ttyplay (almost, need peek + help)
 - make v0.11 and v0.8 compatible
 - avoid too much recursion
 - handle special resizing escape codes for ttyrec
-- browserify this code
+- browserify this code (almost, only process.hrtime does not exist in browser)
+- help page
+- ttytime
