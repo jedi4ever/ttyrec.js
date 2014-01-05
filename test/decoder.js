@@ -62,7 +62,7 @@ describe('ttyrec decode', function () {
 
     var nr = 10000;
     for (var i=0;i<nr;i++) {
-      var record = encoder.encode(i, 20, new Buffer('a'));
+      var record = encoder.encode(i, 20, new ttyrec.Buffer('a'));
       chunks.push(record);
     }
 
