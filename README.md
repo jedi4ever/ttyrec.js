@@ -36,6 +36,10 @@ See [Ttyrec format specification](http://en.wikipedia.org/wiki/Ttyrec#Technical_
   var fileStream = fs.createReadStream('ttyrecord');
 
   var ttyplayStream = new ttyrec.playStream();
+
+  // Play at half the speed
+  ttyplayStream.setSpeed(0.5);
+
   fileStream.pipe(ttyplayStream);
   ttyplayStream.pipe(process.stdout);
 ```

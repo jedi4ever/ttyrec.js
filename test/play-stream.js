@@ -65,7 +65,7 @@ describe('ttyrec Play Stream', function () {
     done();
   });
 
-  it.skip('should work with utf8', function(done) {
+  it('should work with utf8', function(done) {
     var playStream = new ttyrec.PlayStream();
 
     var text = '0123456789𡥂';
@@ -80,6 +80,26 @@ describe('ttyrec Play Stream', function () {
 
     var encoded = encoder.encode(0,0,new ttyrec.Buffer(text));
     playStream.write(encoded);
+  });
+
+  it('should not wait with speed 0', function(done) {
+    var playStream = new ttyrec.PlayStream();
+    playStream.setSpeed(0);
+
+    var text = '0123456789';
+
+    var count = 0;
+    playStream.on('data', function(t) {
+      count++;
+      if (count === 2) {
+        done();
+      }
+    });
+
+    var encoded1 = encoder.encode(0,0,new ttyrec.Buffer(text));
+    var encoded2 = encoder.encode(1000,0,new ttyrec.Buffer(text));
+    playStream.write(encoded1);
+    playStream.write(encoded2);
   });
 
 });

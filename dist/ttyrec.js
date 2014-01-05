@@ -157,6 +157,8 @@ var TtyPlayStream = function(options) {
 
   self.prevRecord = null;
 
+  self.speed = 1;
+
   // Run parent constructor
   Transform.call(this, self.settings);
 
@@ -197,7 +199,7 @@ TtyPlayStream.prototype._transform = function(chunk, encoding, callback) {
       prevTs = (self.prevRecord.header.sec * 1000) + (self.prevRecord.header.usec/1000);
     }
 
-    var deltaTs = ts - prevTs;
+    var deltaTs = (ts - prevTs) * self.speed ;
 
     self.prevRecord = record;
 
@@ -217,6 +219,11 @@ TtyPlayStream.prototype._flush = function(callback) {
   callback(null);
 };
 
+TtyPlayStream.prototype.setSpeed = function(speed) {
+  var self = this;
+
+  self.speed = speed;
+};
 
 },{"./decoder":1,"__browserify_Buffer":10,"async":7,"events":8,"stream":16,"util":24}],4:[function(require,module,exports){
 var process=require("__browserify_process"),Buffer=require("__browserify_Buffer");'use strict';
