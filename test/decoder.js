@@ -39,7 +39,7 @@ describe('ttyrec decode', function () {
     var decoder = ttyrec.decoder;
     var encoder = ttyrec.encoder;
 
-    var onerecord = encoder.encode(10, 20, new ttyrec.Buffer('abc'));
+    var onerecord = encoder.encode(0, 20, new ttyrec.Buffer('abc'));
     var tworecord = encoder.encode(10, 20, new ttyrec.Buffer('abc'));
 
     var bothrecords = ttyrec.Buffer.concat([ onerecord, tworecord]);
@@ -50,8 +50,8 @@ describe('ttyrec decode', function () {
 
     expect(records.length).to.be(1);
     expect(firstRecord.packet.toString()).to.be('abc');
+    expect(firstRecord.header.sec).to.be(0);
     expect(firstRecord.header.usec).to.be(20);
-    expect(firstRecord.header.sec).to.be(10);
     done();
   });
 
