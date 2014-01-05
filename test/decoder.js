@@ -4,7 +4,7 @@ describe('ttyrec decode', function () {
     var decoder = ttyrec.decoder;
     var encoder = ttyrec.encoder;
 
-    var onerecord = encoder.encode(10, 20, new Buffer('abc'));
+    var onerecord = encoder.encode(10, 20, new ttyrec.Buffer('abc'));
     expect(decoder.decode(onerecord)[0].length).to.be(1);
     done();
   });
@@ -13,7 +13,7 @@ describe('ttyrec decode', function () {
     var decoder = ttyrec.decoder;
     var encoder = ttyrec.encoder;
 
-    var onerecord = encoder.encode(10, 20, new Buffer('abc'));
+    var onerecord = encoder.encode(10, 20, new ttyrec.Buffer('abc'));
     var incompleteRecord = onerecord.slice(0, -2);
 
     // 0 records found
@@ -27,9 +27,9 @@ describe('ttyrec decode', function () {
     var decoder = ttyrec.decoder;
     var encoder = ttyrec.encoder;
 
-    var onerecord = encoder.encode(10, 20, new Buffer('abc'));
-    var tworecord = encoder.encode(10, 20, new Buffer('abc'));
-    var bothrecords = Buffer.concat([ onerecord, tworecord]);
+    var onerecord = encoder.encode(10, 20, new ttyrec.Buffer('abc'));
+    var tworecord = encoder.encode(10, 20, new ttyrec.Buffer('abc'));
+    var bothrecords = ttyrec.Buffer.concat([ onerecord, tworecord]);
 
     expect(decoder.decode(bothrecords)[0].length).to.be(2);
     done();
@@ -39,10 +39,10 @@ describe('ttyrec decode', function () {
     var decoder = ttyrec.decoder;
     var encoder = ttyrec.encoder;
 
-    var onerecord = encoder.encode(10, 20, new Buffer('abc'));
-    var tworecord = encoder.encode(10, 20, new Buffer('abc'));
+    var onerecord = encoder.encode(10, 20, new ttyrec.Buffer('abc'));
+    var tworecord = encoder.encode(10, 20, new ttyrec.Buffer('abc'));
 
-    var bothrecords = Buffer.concat([ onerecord, tworecord]);
+    var bothrecords = ttyrec.Buffer.concat([ onerecord, tworecord]);
     var incompleteRecords = bothrecords.slice(0, -2);
 
     var records = decoder.decode(incompleteRecords)[0];

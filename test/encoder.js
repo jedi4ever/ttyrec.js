@@ -4,7 +4,7 @@ describe('ttyrec encoder', function () {
     var encoder = ttyrec.encoder;
     var sec = 10;
     var usec = 10;
-    var chunk = new Buffer(1);
+    var chunk = new ttyrec.Buffer(1);
     chunk[0] = 'a';
 
     var record = encoder.encode(sec, usec, chunk) ;

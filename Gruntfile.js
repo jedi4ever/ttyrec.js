@@ -58,7 +58,7 @@ module.exports = function(grunt) {
       test: {
         options: {
           reporter: 'list',
-          require: [ 'coverage/blanket', 'test/common' ]
+          require: [ 'coverage/blanket' , 'test/common' ]
         },
         src: ['test/*.js']
       },
@@ -167,7 +167,7 @@ module.exports = function(grunt) {
           'dist/ttyrec.js': ['lib/ttyrec.js'],
         },
         options: {
-          'standalone': 'ttyrec'
+          'alias': 'lib/ttyrec.js:ttyrec',
         }
       }
     }

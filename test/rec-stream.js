@@ -10,7 +10,7 @@ describe('ttyrec Rec Stream', function () {
       var results = decoder.decode(record);
       var records = results[0];
       var r = records[0];
-      expect(r.packet).to.eql(new Buffer(text));
+      expect(r.packet).to.eql(new ttyrec.Buffer(text));
       expect(r.header.sec).to.be(0);
       expect(r.header.usec).to.be(0);
       expect(r.header.length).to.be(3);
@@ -35,8 +35,8 @@ describe('ttyrec Rec Stream', function () {
       trecords.push(r);
 
       if (trecords.length === 2) {
-        expect(trecords[0].packet).to.eql(new Buffer(text1));
-        expect(trecords[1].packet).to.eql(new Buffer(text2));
+        expect(trecords[0].packet).to.eql(new ttyrec.Buffer(text1));
+        expect(trecords[1].packet).to.eql(new ttyrec.Buffer(text2));
         recStream.end();
         done();
       }
@@ -55,7 +55,7 @@ describe('ttyrec Rec Stream', function () {
       done();
     });
 
-    var largeChunk = new Buffer('0123456789abcdefghijklmnopqrstuvwxyz');
+    var largeChunk = new ttyrec.Buffer('0123456789abcdefghijklmnopqrstuvwxyz');
     recStream.write(largeChunk);
   });
 
@@ -63,7 +63,7 @@ describe('ttyrec Rec Stream', function () {
     var options = { highWaterMark: 1 };
     var recStream = new ttyrec.RecStream(options);
 
-    var largeChunk = new Buffer('0123456789abcdefghijklmnopqrstuvwxyz');
+    var largeChunk = new ttyrec.Buffer('0123456789abcdefghijklmnopqrstuvwxyz');
     var canContinueWriting = recStream.write(largeChunk);
     expect(canContinueWriting).to.be(false);
     done();
