@@ -241,6 +241,33 @@ var encoder = require('./encoder');
 
 var Transform = require('stream').Transform;
 
+var hrtime = process.hrtime;
+
+if (typeof(hrtime) !== 'function') {
+  hrtime = function(prev) {
+
+    var tsNow = new Date().getTime(); // only msec resolution
+    var sec, msec, nsec;
+
+    if (prev === undefined) {
+      sec = Math.floor(tsNow / 1000);
+      msec = tsNow % 1000 ;
+      nsec = 1e6 * msec;
+
+    } else {
+      var tsPrev = prev[0] * 1e9 + prev[1];
+      var delta = tsNow * 1e6 - tsPrev;
+
+      sec = Math.floor(delta / 1000);
+      msec = delta % 1000 ;
+      nsec = 1e6 * msec;
+
+    }
+
+    return [ sec, nsec ];
+  };
+}
+
 /**
  * @constructor
  * @name TtyRecStream
@@ -284,12 +311,12 @@ TtyRecStream.prototype._transform = function(chunk, encoding, callback) {
 
   if (self.time === null) {
     // This is the first we are writing
-    self.time = process.hrtime();
+    self.time = hrtime();
     sec = 0;
     usec = 0;
   } else {
     // This is next time
-    var diff = process.hrtime(self.time);
+    var diff = hrtime(self.time);
     sec = diff[0] ;
     usec =  Math.round(diff[1] / 1e3);
   }
