@@ -10,6 +10,16 @@ var argv = require('minimist')(process.argv.slice(2), { boolean: [ 'n' ]});
 var filename = argv._[0] || null;
 var speed = 1;
 
+function help() {
+  var man = [
+    "Usage: ttyplay [OPTION] [FILE]",
+    "-s SPEED Set speed to SPEED [1.0]",
+    "-n       No wait mode"
+  ];
+  console.log(man.join('\n'));
+  process.exit(0);
+};
+
 if (argv.s !== undefined ) {
   speed = argv.s;
 };
@@ -26,18 +36,28 @@ var ttyrec = require('../lib/ttyrec.js');
 var ttyplayStream = new ttyrec.PlayStream();
 ttyplayStream.setSpeed(speed);
 
+
 if (typeof process.stdin.setRawMode === 'function') {
   process.stdin.setRawMode(true);
 }
 
 if (filename === null) {
   // If we are piped to , set raw mode
-
+  if (process.stdin.isTTY === true) {
+    help();
+    process.exit(1);
+    // We are piped to stdin
+  }
 
   fileStream = process.stdin;
 } else {
   fileStream = fs.createReadStream(filename);
 }
+
+fileStream.on('error', function(err) {
+  console.error('Error reading file', filename, ':' ,err.toString());
+  process.exit(-1);
+});
 
 fileStream.pipe(ttyplayStream);
 ttyplayStream.pipe(process.stdout);

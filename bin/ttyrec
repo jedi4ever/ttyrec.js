@@ -11,9 +11,18 @@ var argv = require('minimist')(process.argv.slice(2));
 var shell = argv.e || process.env['SHELL'];
 var filename = argv._[0] || 'ttyrecord';
 
-var fileStream = fs.createWriteStream('ttyrecord');
+function help() {
+  var man = [
+    "usage: ttyrec [-e command] [file]"
+  ];
+  console.log(man.join('\n'));
+  process.exit(0);
+};
+
+var fileStream = fs.createWriteStream(filename);
+
 fileStream.on('error', function(err) {
-  console.err('Error', err.toString());
+  console.error('Error creating file', filename, err.toString());
   process.exit(-1);
 });
 
