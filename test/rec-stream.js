@@ -62,12 +62,12 @@ describe('ttyrec Rec Stream', function () {
   it('should pass Rec stream options', function(done) {
     var options = { highWaterMark: 1 };
     var recStream = new ttyrec.RecStream(options);
-    recStream.on('data', function(record) {
-      done();
-    });
 
     var largeChunk = new Buffer('0123456789abcdefghijklmnopqrstuvwxyz');
-    recStream.write(largeChunk);
+    var canContinueWriting = recStream.write(largeChunk);
+    expect(canContinueWriting).to.be(false);
+    done();
+
   });
 
   it.skip('should work with utf8', function(done) {

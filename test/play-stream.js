@@ -58,13 +58,11 @@ describe('ttyrec Play Stream', function () {
     var options = { highWaterMark: 1 };
     var playStream = new ttyrec.PlayStream(options);
 
-    playStream.on('data', function(t) {
-      done();
-    });
-
     var text = '0123456789';
     var encoded = encoder.encode(0,0,new Buffer(text));
-    playStream.write(encoded);
+    var canContinueWriting = playStream.write(encoded);
+    expect(canContinueWriting).to.be(false);
+    done();
   });
 
   it('should work with utf8', function(done) {
