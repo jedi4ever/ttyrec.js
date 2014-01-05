@@ -70,17 +70,18 @@ describe('ttyrec Rec Stream', function () {
 
   });
 
-  it.skip('should work with utf8', function(done) {
+  it('should work with utf8', function(done) {
     var text = '0123456789𡥂';
 
     var recStream = new ttyrec.RecStream();
     recStream.setEncoding('utf8');
 
-    recStream.on('data', function(record) {
+    recStream.on('data', function(utfRecord) {
+      var record = new Buffer(utfRecord);
       var results = decoder.decode(record);
       var records = results[0];
       var r = records[0];
-      expect(r.packet).to.be(text);
+      expect(r.packet).to.eql(new Buffer(text));
       done();
     });
 
