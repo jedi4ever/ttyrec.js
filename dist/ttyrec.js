@@ -19,7 +19,7 @@ function parseBuffer(chunk) {
 
     var allRecords ;
 
-    if (records === []) {
+    if (records.length === 0) {
       allRecords = [ record ];
     } else {
       allRecords = [ record ];
@@ -199,7 +199,13 @@ TtyPlayStream.prototype._transform = function(chunk, encoding, callback) {
       prevTs = (self.prevRecord.header.sec * 1000) + (self.prevRecord.header.usec/1000);
     }
 
-    var deltaTs = (ts - prevTs) * self.speed ;
+    var deltaTs;
+
+    if (self.speed === 0) {
+      deltaTs = 0;
+    } else {
+      deltaTs = (ts - prevTs) / self.speed ;
+    }
 
     self.prevRecord = record;
 
