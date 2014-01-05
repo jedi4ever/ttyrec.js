@@ -54,5 +54,34 @@ describe('ttyrec Play Stream', function () {
     playStream.write(encoded2);
   });
 
+  it('should pass Play stream options', function(done) {
+    var options = { highWaterMark: 1 };
+    var playStream = new ttyrec.PlayStream(options);
+
+    playStream.on('data', function(t) {
+      done();
+    });
+
+    var text = '0123456789';
+    var encoded = encoder.encode(0,0,new Buffer(text));
+    playStream.write(encoded);
+  });
+
+  it('should work with utf8', function(done) {
+    var playStream = new ttyrec.PlayStream();
+
+    var text = '0123456789𡥂';
+
+    playStream.setEncoding('utf8');
+
+    playStream.on('data', function(t) {
+      expect(t).to.be(text);
+      expect(t).to.be.a('string');
+      done();
+    });
+
+    var encoded = encoder.encode(0,0,new Buffer(text));
+    playStream.write(encoded);
+  });
 
 });

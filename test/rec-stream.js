@@ -48,4 +48,43 @@ describe('ttyrec Rec Stream', function () {
     },10);
   });
 
+  it('should pass stream options', function(done) {
+    var options = { highWaterMark: 1 };
+    var recStream = new ttyrec.RecStream(options);
+    recStream.on('data', function(record) {
+      done();
+    });
+
+    var largeChunk = new Buffer('0123456789abcdefghijklmnopqrstuvwxyz');
+    recStream.write(largeChunk);
+  });
+
+  it('should pass Rec stream options', function(done) {
+    var options = { highWaterMark: 1 };
+    var recStream = new ttyrec.RecStream(options);
+    recStream.on('data', function(record) {
+      done();
+    });
+
+    var largeChunk = new Buffer('0123456789abcdefghijklmnopqrstuvwxyz');
+    recStream.write(largeChunk);
+  });
+
+  it.skip('should work with utf8', function(done) {
+    var text = '0123456789𡥂';
+
+    var recStream = new ttyrec.RecStream();
+    recStream.setEncoding('utf8');
+
+    recStream.on('data', function(record) {
+      var results = decoder.decode(record);
+      var records = results[0];
+      var r = records[0];
+      expect(r).to.eql(text);
+      done();
+    });
+
+
+    recStream.write(text);
+  });
 });
