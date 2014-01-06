@@ -9,6 +9,10 @@ var minimist = require('minimist');
 var argv = require('minimist')(process.argv.slice(2));
 
 var shell = argv.e || process.env['SHELL'];
+var shellParse = require('shell-quote').parse;
+var shellCmd = shellParse(shell)[0];
+var shellArgs = shellParse(shell).slice(1);
+
 var filename = argv._[0] || 'ttyrecord';
 
 function help() {
@@ -33,8 +37,8 @@ var settings = {
    cols: process.stdout.columns,
    rows: process.stdout.rows,
    cwd: process.cwd(),
-   command: shell
-//   commandArgs: [ '-l' ]
+   command: shellCmd,
+   commandArgs: shellArgs
 };
 
 var ps1 = '(\\[\\033[5;31m\\]*\\[\\033[0m\\])';
