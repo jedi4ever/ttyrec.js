@@ -7,9 +7,13 @@ a native implementation for encoding and decoding ttyrec files.
 # Usage
 This implements a duplex / `transform` stream v2 .  Therefore only node v0.10.x is supported.
 
-It also provides two simple executable `ttyrec` and `ttyplay` commands.
+It also provides two simple executable `ttyrec` and `ttyplay` and `ttytime` commands.
 
 See [Ttyrec format specification](http://en.wikipedia.org/wiki/Ttyrec#Technical_file_format_specification)
+
+# Installation
+
+`npm install ttyrec`
 
 ## Write recStream
 ```js
@@ -102,5 +106,3 @@ console.log(packet.toString());
 - handle special resizing escape codes for ttyrec
 - browserify this code (almost, only process.hrtime does not exist in browser)
 - help page
-- ttytime
-
