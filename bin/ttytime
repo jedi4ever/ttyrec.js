@@ -1,0 +1,56 @@
+#!/usr/bin/env node
+// -*- mode: javascript -*-
+// vi: set ft=javascript :
+'use strict';
+
+
+var minimist = require('minimist');
+var argv = require('minimist')(process.argv.slice(2));
+
+var filename = argv._[0] || null;
+
+function help() {
+  var man = [
+    "Usage: ttytime [FILE]",
+  ];
+  console.log(man.join('\n'));
+  process.exit(0);
+};
+
+var fs = require('fs');
+var fileStream;
+
+var ttyrec = require('../lib/ttyrec.js');
+
+var ttyparseStream = new ttyrec.ParseStream();
+ttyparseStream.setSpeed(0);
+
+
+if (filename === null) {
+    help();
+} else {
+  fileStream = fs.createReadStream(filename);
+}
+
+fileStream.on('error', function(err) {
+  console.error('Error reading file', filename, ':' ,err.toString());
+  process.exit(-1);
+});
+
+fileStream.pipe(ttyparseStream);
+
+var firstRecord = null;
+var lastRecord = null;
+
+ttyparseStream.on('end', function() {
+  console.log('   ', lastRecord.sec - firstRecord.sec, filename);
+  process.exit(0);
+});
+
+ttyparseStream.on('data', function (record) {
+  if (firstRecord === null) {
+    firstRecord = record.header;
+  }
+
+  lastRecord = record.header;
+});

@@ -10,7 +10,8 @@
   "main": "./lib/ttyrec.js",
   "bin": {
     "ttyrec": "./bin/ttyrec",
-    "ttyplay": "./bin/ttyplay"
+    "ttyplay": "./bin/ttyplay",
+    "ttytime": "./bin/ttytime",
   },
   "repository": {
     "type": "git",
