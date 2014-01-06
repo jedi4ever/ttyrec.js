@@ -44,6 +44,26 @@ fileStream.pipe(ttyplayStream);
 ttyplayStream.pipe(process.stdout);
 ```
 
+## parseStream
+```js
+var fs = require('fs');
+
+var ttyrec = require('ttyrec');
+var fileStream = fs.createReadStream('ttyrecord');
+
+var ttyparseStream = new ttyrec.parseStream();
+
+// No waiting = speed 0
+ttyparseStream.setSpeed(0);
+
+fileStream.pipe(ttyparseStream);
+ttyparseStream.on('data', function(record) {
+  console.log(record.header);
+  console.log(record.packet);
+});
+```
+
+
 ## Encode
 ```js
 var ttyrec = require('ttyrec');
