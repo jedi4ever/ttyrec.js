@@ -55,12 +55,12 @@ describe('ttyrec decode', function () {
     done();
   });
 
-  it.skip('should not blow up with too much recursion', function(done) {
+  it('should not blow up with too much recursion', function(done) {
     var decoder = ttyrec.decoder;
     var encoder = ttyrec.encoder;
     var chunks = [];
 
-    var nr = 10000;
+    var nr = 1000;
     for (var i=0;i<nr;i++) {
       var record = encoder.encode(i, 20, new ttyrec.Buffer('a'));
       chunks.push(record);
