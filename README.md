@@ -20,6 +20,8 @@ It also provides a few simple executable:
 
 # Installation
 
+[![NPM](https://nodei.co/npm/ttyrec.png?downloads=true&stars=true)](https://nodei.co/npm/ttyrec/)
+
 `npm install ttyrec`
 
 ## Write recStream
