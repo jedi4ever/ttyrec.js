@@ -7,3 +7,4 @@ coverage.html
 config.js
 .grunt
 ttyrecord
+ttyrecord.json

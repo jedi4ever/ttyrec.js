@@ -125,7 +125,121 @@ module.exports = {
   encode: encode
 };
 
-},{"__browserify_Buffer":11}],3:[function(require,module,exports){
+},{"__browserify_Buffer":13}],3:[function(require,module,exports){
+var process=require("__browserify_process"),Buffer=require("__browserify_Buffer");'use strict';
+
+var events = require('events');
+var util = require('util');
+
+var Transform = require('stream').Transform;
+
+function defaultHandler(stream, record, callback) {
+  stream.push(record);
+  callback(null);
+}
+
+var hrtime = process.hrtime;
+
+if (typeof(hrtime) !== 'function') {
+  hrtime = function(prev) {
+
+    var tsNow = new Date().getTime(); // only msec resolution
+    var sec, msec, nsec;
+
+    if (prev === undefined) {
+      sec = Math.floor(tsNow / 1000);
+      msec = tsNow % 1000 ;
+      nsec = 1e6 * msec;
+
+    } else {
+      var tsPrev = prev[0] * 1e9 + prev[1];
+      var delta = tsNow * 1e6 - tsPrev;
+
+      sec = Math.floor(delta / 1000);
+      msec = delta % 1000 ;
+      nsec = 1e6 * msec;
+
+    }
+
+    return [ sec, nsec ];
+  };
+}
+
+/**
+ * @constructor
+ * @name TtyGeneratorStream
+ * @param {Hash} options
+ */
+var TtyGeneratorStream = function(options) {
+
+  var self = this;
+
+  if (options === undefined) {
+    self.settings = {};
+  } else {
+    // Copy the options
+    self.settings = JSON.parse(JSON.stringify(options));
+  }
+
+  self.time = null;
+
+  if (options && options.handler) {
+    self.handler = options.handler;
+  } else {
+    self.handler = defaultHandler;
+    self.settings.objectMode = true;
+  }
+
+  // Run parent constructor
+  Transform.call(this, self.settings);
+
+};
+
+util.inherits(TtyGeneratorStream, Transform);
+
+module.exports = TtyGeneratorStream;
+
+TtyGeneratorStream.prototype._transform = function(chunk, encoding, callback) {
+
+  var self = this;
+
+  var sec, usec;
+  var bufferChunk;
+
+  if (encoding === 'buffer') {
+    bufferChunk = chunk;
+  }
+
+  if (encoding === 'utf8') {
+    bufferChunk = new Buffer(chunk, 'utf8');
+  }
+
+  if (self.time === null) {
+    // This is the first we are writing
+    self.time = hrtime();
+    sec = 0;
+    usec = 0;
+  } else {
+    // This is next time
+    var diff = hrtime(self.time);
+    sec = diff[0] ;
+    usec =  Math.round(diff[1] / 1e3);
+  }
+
+  var record = {
+      header: {
+        sec: sec,
+        usec: usec
+      },
+      packet: bufferChunk
+  };
+
+  self.handler(self, record, callback);
+
+};
+
+
+},{"__browserify_Buffer":13,"__browserify_process":14,"events":11,"stream":19,"util":27}],4:[function(require,module,exports){
 var Buffer=require("__browserify_Buffer");'use strict';
 
 var events = require('events');
@@ -246,7 +360,7 @@ TtyParserStream.prototype.setSpeed = function(speed) {
   self.speed = speed;
 };
 
-},{"./decoder":1,"__browserify_Buffer":11,"async":8,"events":9,"stream":17,"util":25}],4:[function(require,module,exports){
+},{"./decoder":1,"__browserify_Buffer":13,"async":10,"events":11,"stream":19,"util":27}],5:[function(require,module,exports){
 'use strict';
 
 var events = require('events');
@@ -285,42 +399,63 @@ util.inherits(TtyPlayStream, TtyParseStream);
 module.exports = TtyPlayStream;
 
 
-},{"./parse-stream":3,"events":9,"util":25}],5:[function(require,module,exports){
-var process=require("__browserify_process"),Buffer=require("__browserify_Buffer");'use strict';
+},{"./parse-stream":4,"events":11,"util":27}],6:[function(require,module,exports){
+'use strict';
+
+var events = require('events');
+var util = require('util');
+var jsesc = require('jsesc');
+
+var TtyGeneratorStream = require('./generator-stream');
+
+/**
+ * @constructor
+ * @name TtyRecPlusPlusStream
+ * @param {Hash} options
+ */
+var TtyRecPlusPlusStream = function(options) {
+
+  var self = this;
+
+  if (options === undefined) {
+    self.settings = {};
+  } else {
+    // Copy the options
+    self.settings = JSON.parse(JSON.stringify(options));
+  }
+
+
+  // Push the ttyrec++ packet
+  self.settings.handler = function(stream, record, callback) {
+    // Join the header and chunk in one buffer/packet
+    var packetBuffer = {
+      sec: record.header.sec,
+      usec: record.header.usec,
+      data: jsesc(record.packet.toString('utf8'))
+    };
+    stream.push(packetBuffer);
+    callback(null);
+  };
+
+  self.settings.objectMode = true;
+
+  // Run parent constructor
+  TtyGeneratorStream.call(this, self.settings);
+
+};
+
+util.inherits(TtyRecPlusPlusStream, TtyGeneratorStream);
+
+module.exports = TtyRecPlusPlusStream;
+
+},{"./generator-stream":3,"events":11,"jsesc":28,"util":27}],7:[function(require,module,exports){
+'use strict';
 
 var events = require('events');
 var util = require('util');
 
 var encoder = require('./encoder');
-
-var Transform = require('stream').Transform;
-
-var hrtime = process.hrtime;
-
-if (typeof(hrtime) !== 'function') {
-  hrtime = function(prev) {
-
-    var tsNow = new Date().getTime(); // only msec resolution
-    var sec, msec, nsec;
-
-    if (prev === undefined) {
-      sec = Math.floor(tsNow / 1000);
-      msec = tsNow % 1000 ;
-      nsec = 1e6 * msec;
-
-    } else {
-      var tsPrev = prev[0] * 1e9 + prev[1];
-      var delta = tsNow * 1e6 - tsPrev;
-
-      sec = Math.floor(delta / 1000);
-      msec = delta % 1000 ;
-      nsec = 1e6 * msec;
-
-    }
-
-    return [ sec, nsec ];
-  };
-}
+var TtyGeneratorStream = require('./generator-stream');
 
 /**
  * @constructor
@@ -338,74 +473,48 @@ var TtyRecStream = function(options) {
     self.settings = JSON.parse(JSON.stringify(options));
   }
 
-  self.time = null;
+  self.settings.handler = function(stream, record, callback) {
+    var header = record.header;
+
+    var packetBuffer = encoder.encode(header.sec, header.usec, record.packet);
+    stream.push(packetBuffer);
+    callback(null);
+  };
+
   // Run parent constructor
-  Transform.call(this, self.settings);
+  TtyGeneratorStream.call(this, self.settings);
 
 };
 
-util.inherits(TtyRecStream, Transform);
+util.inherits(TtyRecStream, TtyGeneratorStream);
 
 module.exports = TtyRecStream;
 
-TtyRecStream.prototype._transform = function(chunk, encoding, callback) {
-
-  var self = this;
-
-  var sec, usec;
-  var bufferChunk;
-
-  if (encoding === 'buffer') {
-    bufferChunk = chunk;
-  }
-
-  if (encoding === 'utf8') {
-    bufferChunk = new Buffer(chunk, 'utf8');
-  }
-
-  if (self.time === null) {
-    // This is the first we are writing
-    self.time = hrtime();
-    sec = 0;
-    usec = 0;
-  } else {
-    // This is next time
-    var diff = hrtime(self.time);
-    sec = diff[0] ;
-    usec =  Math.round(diff[1] / 1e3);
-  }
-
-  // Join the header and chunk in one buffer/packet
-  var packetBuffer = encoder.encode(sec, usec, bufferChunk);
-
-  // Push the ttyrec packet
-  self.push(packetBuffer);
-
-  // Signal we are done with no errors
-  callback(null);
-};
-
-
-},{"./encoder":2,"__browserify_Buffer":11,"__browserify_process":12,"events":9,"stream":17,"util":25}],"ttyrec":[function(require,module,exports){
+},{"./encoder":2,"./generator-stream":3,"events":11,"util":27}],"ttyrec":[function(require,module,exports){
 module.exports=require('CgkM+t');
 },{}],"CgkM+t":[function(require,module,exports){
-var process=require("__browserify_process"),Buffer=require("__browserify_Buffer");var playstream = require('./play-stream');
-var recstream = require('./rec-stream');
-var parsestream = require('./parse-stream');
+var process=require("__browserify_process"),Buffer=require("__browserify_Buffer");var playStream = require('./play-stream');
+var recStream = require('./rec-stream');
+var recPlusPlusStream = require('./rec-plus-plus-stream');
+
+var parseStream = require('./parse-stream');
+var generatorStream = require('./generator-stream');
 var encoder = require('./encoder.js');
 var decoder = require('./decoder.js');
 
 module.exports = {
-  PlayStream: playstream,
-  RecStream: recstream,
-  ParseStream: parsestream,
+  PlayStream: playStream,
+  RecStream: recStream,
+  RecPlusPlusStream: recPlusPlusStream,
+  ParseStream: parseStream,
+  GeneratorStream: generatorStream,
   encoder: encoder,
   decoder: decoder,
   Buffer: Buffer,
   process: process
 };
 
-},{"./decoder.js":1,"./encoder.js":2,"./parse-stream":3,"./play-stream":4,"./rec-stream":5,"__browserify_Buffer":11,"__browserify_process":12}],8:[function(require,module,exports){
+},{"./decoder.js":1,"./encoder.js":2,"./generator-stream":3,"./parse-stream":4,"./play-stream":5,"./rec-plus-plus-stream":6,"./rec-stream":7,"__browserify_Buffer":13,"__browserify_process":14}],10:[function(require,module,exports){
 var process=require("__browserify_process");/*global setImmediate: false, setTimeout: false, console: false */
 (function () {
 
@@ -1362,7 +1471,7 @@ var process=require("__browserify_process");/*global setImmediate: false, setTim
 
 }());
 
-},{"__browserify_process":12}],9:[function(require,module,exports){
+},{"__browserify_process":14}],11:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1664,7 +1773,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -1689,7 +1798,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"PcZj9L":[function(require,module,exports){
 var base64 = require('base64-js')
 var ieee754 = require('ieee754')
@@ -3047,7 +3156,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
 },{}]},{},[])
 ;;module.exports=require("native-buffer-browserify").Buffer
 
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -3102,7 +3211,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var base64 = require('base64-js')
 var ieee754 = require('ieee754')
 
@@ -4097,7 +4206,7 @@ function assert (test, message) {
   if (!test) throw new Error(message || 'Failed assertion')
 }
 
-},{"base64-js":14,"ieee754":15}],14:[function(require,module,exports){
+},{"base64-js":16,"ieee754":17}],16:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -4224,7 +4333,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }());
 
 
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -4310,7 +4419,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4384,7 +4493,7 @@ function onend() {
   });
 }
 
-},{"./readable.js":20,"./writable.js":22,"inherits":10,"process/browser.js":18}],17:[function(require,module,exports){
+},{"./readable.js":22,"./writable.js":24,"inherits":12,"process/browser.js":20}],19:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4513,9 +4622,9 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"./duplex.js":16,"./passthrough.js":19,"./readable.js":20,"./transform.js":21,"./writable.js":22,"events":9,"inherits":10}],18:[function(require,module,exports){
-module.exports=require(12)
-},{}],19:[function(require,module,exports){
+},{"./duplex.js":18,"./passthrough.js":21,"./readable.js":22,"./transform.js":23,"./writable.js":24,"events":11,"inherits":12}],20:[function(require,module,exports){
+module.exports=require(14)
+},{}],21:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4558,7 +4667,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./transform.js":21,"inherits":10}],20:[function(require,module,exports){
+},{"./transform.js":23,"inherits":12}],22:[function(require,module,exports){
 var process=require("__browserify_process");// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -5493,7 +5602,7 @@ function indexOf (xs, x) {
   return -1;
 }
 
-},{"./index.js":17,"__browserify_process":12,"buffer":13,"events":9,"inherits":10,"process/browser.js":18,"string_decoder":23}],21:[function(require,module,exports){
+},{"./index.js":19,"__browserify_process":14,"buffer":15,"events":11,"inherits":12,"process/browser.js":20,"string_decoder":25}],23:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -5699,7 +5808,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./duplex.js":16,"inherits":10}],22:[function(require,module,exports){
+},{"./duplex.js":18,"inherits":12}],24:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6087,7 +6196,7 @@ function endWritable(stream, state, cb) {
   state.ended = true;
 }
 
-},{"./index.js":17,"buffer":13,"inherits":10,"process/browser.js":18}],23:[function(require,module,exports){
+},{"./index.js":19,"buffer":15,"inherits":12,"process/browser.js":20}],25:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6280,14 +6389,14 @@ function base64DetectIncompleteChar(buffer) {
   return incomplete;
 }
 
-},{"buffer":13}],24:[function(require,module,exports){
+},{"buffer":15}],26:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],25:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var process=require("__browserify_process"),global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6875,4 +6984,260 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-},{"./support/isBuffer":24,"__browserify_process":12,"inherits":10}]},{},["CgkM+t"])
+},{"./support/isBuffer":26,"__browserify_process":14,"inherits":12}],28:[function(require,module,exports){
+var global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};/*! http://mths.be/jsesc v0.4.3 by @mathias */
+;(function(root) {
+
+	// Detect free variables `exports`
+	var freeExports = typeof exports == 'object' && exports;
+
+	// Detect free variable `module`
+	var freeModule = typeof module == 'object' && module &&
+		module.exports == freeExports && module;
+
+	// Detect free variable `global`, from Node.js or Browserified code,
+	// and use it as `root`
+	var freeGlobal = typeof global == 'object' && global;
+	if (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal) {
+		root = freeGlobal;
+	}
+
+	/*--------------------------------------------------------------------------*/
+
+	var object = {};
+	var hasOwnProperty = object.hasOwnProperty;
+	var forOwn = function(object, callback) {
+		var key;
+		for (key in object) {
+			if (hasOwnProperty.call(object, key)) {
+				callback(key, object[key]);
+			}
+		}
+	};
+
+	var extend = function(destination, source) {
+		if (!source) {
+			return destination;
+		}
+		forOwn(source, function(key, value) {
+			destination[key] = value;
+		});
+		return destination;
+	};
+
+	var forEach = function(array, callback) {
+		var length = array.length;
+		var index = -1;
+		while (++index < length) {
+			callback(array[index]);
+		}
+	};
+
+	var toString = object.toString;
+	var isArray = function(value) {
+		return toString.call(value) == '[object Array]';
+	};
+	var isObject = function(value) {
+		// simple, but good enough for what we need
+		return toString.call(value) == '[object Object]';
+	};
+	var isString = function(value) {
+		return typeof value == 'string' ||
+			toString.call(value) == '[object String]';
+	};
+
+	/*--------------------------------------------------------------------------*/
+
+	// http://mathiasbynens.be/notes/javascript-escapes#single
+	var singleEscapes = {
+		'"': '\\"',
+		'\'': '\\\'',
+		'\\': '\\\\',
+		'\b': '\\b',
+		'\f': '\\f',
+		'\n': '\\n',
+		'\r': '\\r',
+		'\t': '\\t'
+		// `\v` is omitted intentionally, because in IE < 9, '\v' == 'v'
+		// '\v': '\\x0B'
+	};
+	var regexSingleEscape = /["'\\\b\f\n\r\t]/;
+
+	var regexDigit = /[0-9]/;
+	var regexWhitelist = /[\x20\x21\x23-\x26\x28-\x5B\x5D-\x7E]/;
+
+	var jsesc = function(argument, options) {
+		// Handle options
+		var defaults = {
+			'escapeEverything': false,
+			'quotes': 'single',
+			'wrap': false,
+			'es6': false,
+			'json': false,
+			'compact': true,
+			'indent': '\t',
+			'__indent__': ''
+		};
+		var json = options && options.json;
+		if (json) {
+			defaults.quotes = 'double';
+			defaults.wrap = true;
+		}
+		options = extend(defaults, options);
+		if (options.quotes != 'single' && options.quotes != 'double') {
+			options.quotes = 'single';
+		}
+		var quote = options.quotes == 'double' ? '"' : '\'';
+		var compact = options.compact;
+		var indent = options.indent;
+		var oldIndent;
+		var newLine = compact ? '' : '\n';
+		var result;
+		var isEmpty = true;
+
+		if (!isString(argument)) {
+			if (isArray(argument)) {
+				result = [];
+				options.wrap = true;
+				oldIndent = options.__indent__;
+				indent += oldIndent;
+				options.__indent__ = indent;
+				forEach(argument, function(value) {
+					isEmpty = false;
+					result.push(
+						(compact ? '' : indent) +
+						jsesc(value, options)
+					);
+				});
+				if (isEmpty) {
+					return '[]';
+				}
+				return '[' + newLine + result.join(',' + newLine) + newLine +
+					(compact ? '' : oldIndent) + ']';
+			} else if (!isObject(argument)) {
+				if (json) {
+					// For some values (e.g. `undefined`, `function` objects),
+					// `JSON.stringify(value)` returns `undefined` (which isn’t valid
+					// JSON) instead of `'null'`.
+					return JSON.stringify(argument) || 'null';
+				}
+				return String(argument);
+			} else { // it’s an object
+				result = [];
+				options.wrap = true;
+				oldIndent = options.__indent__;
+				indent += oldIndent;
+				options.__indent__ = indent;
+				forOwn(argument, function(key, value) {
+					isEmpty = false;
+					result.push(
+						(compact ? '' : indent) +
+						jsesc(key, options) + ':' +
+						(compact ? '' : ' ') +
+						jsesc(value, options)
+					);
+				});
+				if (isEmpty) {
+					return '{}';
+				}
+				return '{' + newLine + result.join(',' + newLine) + newLine +
+					(compact ? '' : oldIndent) + '}';
+			}
+		}
+
+		var string = argument;
+		// Loop over each code unit in the string and escape it
+		var index = -1;
+		var length = string.length;
+		var first;
+		var second;
+		var codePoint;
+		result = '';
+		while (++index < length) {
+			var character = string.charAt(index);
+			if (options.es6) {
+				first = string.charCodeAt(index);
+				if ( // check if it’s the start of a surrogate pair
+					first >= 0xD800 && first <= 0xDBFF && // high surrogate
+					length > index + 1 // there is a next code unit
+				) {
+					second = string.charCodeAt(index + 1);
+					if (second >= 0xDC00 && second <= 0xDFFF) { // low surrogate
+						// http://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
+						codePoint = (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000;
+						result += '\\u{' + codePoint.toString(16).toUpperCase() + '}';
+						index++;
+						continue;
+					}
+				}
+			}
+			if (!options.escapeEverything) {
+				if (regexWhitelist.test(character)) {
+					// It’s a printable ASCII character that is not `"`, `'` or `\`,
+					// so don’t escape it.
+					result += character;
+					continue;
+				}
+				if (character == '"') {
+					result += quote == character ? '\\"' : character;
+					continue;
+				}
+				if (character == '\'') {
+					result += quote == character ? '\\\'' : character;
+					continue;
+				}
+			}
+			if (
+				character == '\0' &&
+				!json &&
+				!regexDigit.test(string.charAt(index + 1))
+			) {
+				result += '\\0';
+				continue;
+			}
+			if (regexSingleEscape.test(character)) {
+				// no need for a `hasOwnProperty` check here
+				result += singleEscapes[character];
+				continue;
+			}
+			var charCode = character.charCodeAt(0);
+			var hexadecimal = charCode.toString(16).toUpperCase();
+			var longhand = hexadecimal.length > 2 || json;
+			var escaped = '\\' + (longhand ? 'u' : 'x') +
+				('0000' + hexadecimal).slice(longhand ? -4 : -2);
+			result += escaped;
+			continue;
+		}
+		if (options.wrap) {
+			result = quote + result + quote;
+		}
+		return result;
+	};
+
+	jsesc.version = '0.4.3';
+
+	/*--------------------------------------------------------------------------*/
+
+	// Some AMD build optimizers, like r.js, check for specific condition patterns
+	// like the following:
+	if (
+		typeof define == 'function' &&
+		typeof define.amd == 'object' &&
+		define.amd
+	) {
+		define(function() {
+			return jsesc;
+		});
+	}	else if (freeExports && !freeExports.nodeType) {
+		if (freeModule) { // in Node.js or RingoJS v0.8.0+
+			freeModule.exports = jsesc;
+		} else { // in Narwhal or RingoJS v0.7.0-
+			freeExports.jsesc = jsesc;
+		}
+	} else { // in Rhino or a web browser
+		root.jsesc = jsesc;
+	}
+
+}(this));
+
+},{}]},{},["CgkM+t"])

@@ -1,0 +1,76 @@
+#!/usr/bin/env node
+// -*- mode: javascript -*-
+// vi: set ft=javascript :
+'use strict';
+
+var fs = require('fs');
+
+var minimist = require('minimist');
+var argv = require('minimist')(process.argv.slice(2));
+
+var shell = argv.e || process.env['SHELL'];
+var shellParse = require('shell-quote').parse;
+var shellCmd = shellParse(shell)[0];
+var shellArgs = shellParse(shell).slice(1);
+
+var filename = argv._[0] || 'ttyrecord.json';
+
+function help() {
+  var man = [
+    "usage: ttyrec++ [-e command] [file]"
+  ];
+  console.log(man.join('\n'));
+  process.exit(0);
+};
+
+var fileStream = fs.createWriteStream(filename);
+
+fileStream.on('error', function(err) {
+  console.error('Error creating file', filename, err.toString());
+  process.exit(-1);
+});
+
+var ttyrec = require('../lib/ttyrec.js');
+var ttyrecStream = new ttyrec.RecPlusPlusStream();
+
+var settings = {
+   cols: process.stdout.columns,
+   rows: process.stdout.rows,
+   cwd: process.cwd(),
+   command: shellCmd,
+   commandArgs: shellArgs
+};
+
+var ps1 = '(\\[\\033[5;31m\\]*\\[\\033[0m\\])';
+var penv = JSON.parse(JSON.stringify(process.env));
+var nps1 = [ ps1 , process.env['PS1'] ].join('');
+penv['PS1'] = nps1;
+penv['SHELL'] = shell;
+
+
+var pty = require('pty.js');
+var _pty = pty.spawn(settings.command , settings.commandArgs, {
+  cmd: settings.cwd,
+  env: penv,
+  cols: settings.cols,
+  rows: settings.rows
+});
+
+_pty.on('end', function(data) {
+  process.exit();
+});
+
+
+// If we are piped to , set raw mode
+if (typeof process.stdin.setRawMode === 'function') {
+  process.stdin.setRawMode(true);
+}
+
+process.stdin.pipe(_pty);
+
+//_pty.pipe(ttyrecStream).pipe(fileStream);
+_pty.pipe(ttyrecStream);
+ttyrecStream.on('data', function(record) {
+  fileStream.write(JSON.stringify(record)+'\n');
+});
+_pty.pipe(process.stdout);
