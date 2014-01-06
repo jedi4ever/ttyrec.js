@@ -12,65 +12,64 @@ It also provides two simple executable `ttyrec` and `ttyplay` commands.
 See [Ttyrec format specification](http://en.wikipedia.org/wiki/Ttyrec#Technical_file_format_specification)
 
 ## Write recStream
-```
-  var fs = require('fs');
-  var pty = require('pty');
+```js
+var fs = require('fs');
+var pty = require('pty');
 
-  var ttyrec = require('ttyrec');
-  var ttyrecStream = new ttyrec.recStream();
+var ttyrec = require('ttyrec');
+var ttyrecStream = new ttyrec.recStream();
 
-  var fileStream = fs.createWriteStream('ttyrecord');
+var fileStream = fs.createWriteStream('ttyrecord');
 
-  var _pty = pty.spawn('/bin/bash');
-  process.stdin.pipe(_pty);
+var _pty = pty.spawn('/bin/bash');
+process.stdin.pipe(_pty);
 
-  _pty.pipe(ttyrecStream);
-  ttyrecStream.pipe(fileStream);
+_pty.pipe(ttyrecStream);
+ttyrecStream.pipe(fileStream);
 ```
 
 ## Read playStream
-```
-  var fs = require('fs');
+```js
+var fs = require('fs');
 
-  var ttyrec = require('ttyrec');
-  var fileStream = fs.createReadStream('ttyrecord');
+var ttyrec = require('ttyrec');
+var fileStream = fs.createReadStream('ttyrecord');
 
-  var ttyplayStream = new ttyrec.playStream();
+var ttyplayStream = new ttyrec.playStream();
 
-  // Play at half the speed
-  ttyplayStream.setSpeed(0.5);
+// Play at half the speed
+ttyplayStream.setSpeed(0.5);
 
-  fileStream.pipe(ttyplayStream);
-  ttyplayStream.pipe(process.stdout);
+fileStream.pipe(ttyplayStream);
+ttyplayStream.pipe(process.stdout);
 ```
 
 ## Encode
-```
-  var ttyrec = require('ttyrec');
-  var encoder = ttyrec.encoder;
-  var sec = 0;
-  var usec = 10;
-  var record = encoder.encode(sec, usec, new Buffer('abc');
+```js
+var ttyrec = require('ttyrec');
+var encoder = ttyrec.encoder;
+var sec = 0;
+var usec = 10;
+var record = encoder.encode(sec, usec, new Buffer('abc');
 ```
 
 ## Decode (parseBuffer)
-```
-  var ttyrec = require('ttyrec');
-  var decoder = ttyrec.decoder;
-  var results = decoder.decode(arecord);
+```js
+var ttyrec = require('ttyrec');
+var decoder = ttyrec.decoder;
+var results = decoder.decode(arecord);
 
-  // This returns an array of
-  // [0] = records
-  // [1] = rest of chunk not parsed
-  var records = result[0];
-  var record = records[0];
-  var rest = result[1];
+// This returns an array of
+// [0] = records
+// [1] = rest of chunk not parsed
+var records = result[0];
+var record = records[0];
+var rest = result[1];
 
-  var header = record.header;
-  console.log(header.sec, header.usec, header.length)
-  var packet = record.packet; // Buffer
-  console.log(packet.toString());
-
+var header = record.header;
+console.log(header.sec, header.usec, header.length)
+var packet = record.packet; // Buffer
+console.log(packet.toString());
 ```
 
 # Limitations
@@ -85,3 +84,4 @@ See [Ttyrec format specification](http://en.wikipedia.org/wiki/Ttyrec#Technical_
 - browserify this code (almost, only process.hrtime does not exist in browser)
 - help page
 - ttytime
+
