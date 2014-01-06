@@ -7,7 +7,12 @@ a native implementation for encoding and decoding ttyrec files.
 # Usage
 This implements a duplex / `transform` stream v2 .  Therefore only node v0.10.x is supported.
 
-It also provides two simple executable `ttyrec` and `ttyplay` and `ttytime` commands.
+It also provides a few simple executable:
+
+- `ttyrec` : records ttyrec file from the current terminal
+- `ttyplay`: plays ttyrec files
+- `ttytime`: shows the number of seconds is in the ttyrecord file
+- `ttyrec++` : similar to ttyrec but generator a json file
 
 See [Ttyrec format specification](http://en.wikipedia.org/wiki/Ttyrec#Technical_file_format_specification)
 
@@ -66,7 +71,6 @@ ttyparseStream.on('data', function(record) {
   console.log(record.packet);
 });
 ```
-
 
 ## Encode
 ```js
