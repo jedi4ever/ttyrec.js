@@ -14,7 +14,8 @@ It also provides a few simple executable:
 - `ttytime`: shows the number of seconds is in the ttyrecord file
 - `ttyrec++` : similar to ttyrec but generator a json file
 
-See [Ttyrec format specification](http://en.wikipedia.org/wiki/Ttyrec#Technical_file_format_specification)
+- See [Ttyrec format specification](http://en.wikipedia.org/wiki/Ttyrec#Technical_file_format_specification)
+- See [Ttyrec++](https://github.com/ewaters/ttyrec-plusplus)
 
 # Installation
 
