@@ -66,7 +66,7 @@ describe('ttyrec decode', function () {
       chunks.push(record);
     }
 
-    var bigChunk = Buffer.concat(chunks);
+    var bigChunk = ttyrec.Buffer.concat(chunks);
     var records = decoder.decode(bigChunk)[0];
 
     expect(records.length).to.be(nr);
