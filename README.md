@@ -106,7 +106,7 @@ console.log(packet.toString());
 
 # Limitations
 - only handles buffer streams(non-encoded streams)
-- only works versions above  v0.10.x
+- only works versions v0.10.x (for v0.11 pty.js needs to be patched first)
 
 # Todo
 - enhance the executables to mimic arguments from real ttyrec and ttyplay (almost, need peek + help)
