@@ -106,7 +106,7 @@ console.log(packet.toString());
 
 # Limitations
 - only handles buffer streams(non-encoded streams)
-- only works on v0.10.x
+- only works versions above  v0.10.x
 
 # Todo
 - enhance the executables to mimic arguments from real ttyrec and ttyplay (almost, need peek + help)
