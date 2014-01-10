@@ -170,7 +170,7 @@ if (typeof(hrtime) !== 'function') {
  * @name TtyGeneratorStream
  * @param {Hash} options
  */
-var TtyGeneratorStream = function(options) {
+function TtyGeneratorStream(options) {
 
   var self = this;
 
@@ -193,7 +193,7 @@ var TtyGeneratorStream = function(options) {
   // Run parent constructor
   Transform.call(this, self.settings);
 
-};
+}
 
 util.inherits(TtyGeneratorStream, Transform);
 
