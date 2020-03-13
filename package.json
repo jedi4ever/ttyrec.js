@@ -32,7 +32,7 @@
     "dependencies": {
       "pty.js": "~0.2.3",
       "async": "~0.2.9",
-      "minimist": "0.0.5",
+      "minimist": "1.2.5",
       "shell-quote": "~1.4.1",
       "jsesc": "~0.4.3"
     },
